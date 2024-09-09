@@ -1,4 +1,5 @@
 import bcrypt
+
 def encode_and_hash_password(password: str) -> str:
     """Encode and hash the password using bcrypt"""
     # converting password to array of bytes 

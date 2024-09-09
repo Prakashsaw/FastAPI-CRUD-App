@@ -6,6 +6,7 @@ from schemas.user_schema import all_user_data, individual_user_data
 import secrets
 import string
 from services.secure_password import encode_and_hash_password, verify_password
+from services.jwt_token import create_jwt_token, decode_jwt_token
 
 user_router = APIRouter()
 
@@ -37,7 +38,19 @@ async def get_user_by_id(user_id: str):
 async def create_user(user: SignUpUser):
     try:
         user = dict(user)
-
+        
+        # check that user dict has all required fields
+        if user.get("name") is None or user.get("email") is None or user.get("password") is None:
+            return {"status_code": 400, "message": "Any field can't be empty!"}
+        
+        # Check if user fields are empty or not, it should not be empty
+        if user["name"] == "" or user["email"] == "" or user["password"] == "":
+            return {"status_code": 400, "message": "All fields are required!"}
+        
+        # Check if user already exists
+        if collection.find_one({"email": user["email"]}):
+            return {"status_code": 400, "message": "User already exists!"}
+        
         # Generate 10 digit alfanumeric unique nano id as a user primary key
         # Define the character set: uppercase letters, lowercase letters, and digits
         characters = string.ascii_letters + string.digits
@@ -53,19 +66,7 @@ async def create_user(user: SignUpUser):
         password = user["password"]
         hashed_password = encode_and_hash_password(password)
         user["password"] = hashed_password
-        
-        # check that user dict has all required fields
-        if user.get("name") is None or user.get("email") is None or user.get("password") is None:
-            return {"status_code": 400, "message": "Any field can't be empty!"}
-        
-        # Check if user fields are empty or not, it should not be empty
-        if user["name"] == "" or user["email"] == "" or user["password"] == "":
-            return {"status_code": 400, "message": "All fields are required!"}
-        
-        # Check if user already exists
-        if collection.find_one({"email": user["email"]}):
-            return {"status_code": 400, "message": "User already exists!"}
-        
+
         new_user = collection.insert_one(user)
         created_user = collection.find_one({"user_id": user["user_id"]})
        
@@ -100,19 +101,30 @@ async def login_user(user: LoginUser):
         if is_password_correct == False:
             return {"status_code": 400, "message": "Password is incorrect!"}
         
-        return {"status_code": 200, "message": "User logged in successfully!", "user": individual_user_data(user)}
+        # Generate JWT token
+        payload = {"user_id": user["user_id"], "email": user["email"]}
+        jwt_token = create_jwt_token(payload)
+
+        return {"status_code": 200, "message": "User logged in successfully!", "user": individual_user_data(user), "jwt_access_token": jwt_token}
     except Exception as e:
         return HTTPException(status_code=500, detail=f"Internal Server Error! Error: {str(e)}")
     
     
 async def update_user(user_id: str, user: SignUpUser):
     try:
+        # Before updating the user, first check if user is valid or not with jwt token which is passed in the header
+
         user = dict(user)
         print("User: ", user)
 
         # Check if user fields are empty or not, it should not be empty
         if user["name"] == "" or user["email"] == "" or user["password"] == "":
             return {"status_code": 400, "message": "Any field can't be empty!"}
+        
+        user = collection.find_one({"user_id": user_id})
+        
+        if user is None:
+            return {"status_code": 404, "message": "User not found!"}
         
         collection.find_one_and_update({"user_id": user_id}, {"$set": user})
 
@@ -136,5 +148,3 @@ async def delete_user(user_id: str):
     except Exception as e:
         return HTTPException(status_code=500, detail=f"Internal Server Error! Error: {str(e)}")
     
-async def hello_world():
-    return {"message": "Hello World!"}
