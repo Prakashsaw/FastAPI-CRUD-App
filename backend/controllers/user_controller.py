@@ -51,7 +51,7 @@ async def create_user(user: SignUpUser):
         if collection.find_one({"email": user["email"]}):
             return {"status_code": 400, "message": "User already exists!"}
         
-        # Generate 10 digit alfanumeric unique nano id as a user primary key
+        # Generate 20 digit alfanumeric unique nano id as a user primary key
         # Define the character set: uppercase letters, lowercase letters, and digits
         characters = string.ascii_letters + string.digits
         # Generate a secure random string of the specified length
