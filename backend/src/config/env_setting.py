@@ -1,28 +1,42 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+env_path = Path(".") / ".env"
+load_dotenv(dotenv_path=env_path)
+
 class Settings(BaseSettings):
-    MONGO_URI: str
-    DB_NAME: str
-    JWT_SECRET_KEY: str
-    JWT_ALGORITHM: str
-    JWT_EXPIRY_DAY: int
+    # Database settings
+    MONGO_URI: str = os.getenv("MONGO_URI")
+    DB_NAME: str = os.getenv("DB_NAME")
+
+    # JWT settings
+    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY")
+    JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM")
+    JWT_EXPIRY_DAY: int = os.getenv("JWT_EXPIRY_DAY")
     # REDIS_URL: str = "redis://localhost:6379/0"
-    # MAIL_USERNAME: str
-    # MAIL_PASSWORD: str
-    # MAIL_FROM: str
-    # MAIL_PORT: int
-    # MAIL_SERVER: str
-    # MAIL_FROM_NAME: str
-    # MAIL_STARTTLS: bool = True
-    # MAIL_SSL_TLS: bool = False
-    # USE_CREDENTIALS: bool = True
-    # VALIDATE_CERTS: bool = True
+
+    # Email settings
+    MAIL_USERNAME: str = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD: str = os.getenv("MAIL_PASSWORD")
+    MAIL_PORT: int = os.getenv("MAIL_PORT")
+    MAIL_SERVER: str = os.getenv("MAIL_SERVER")
+    MAIL_FROM: str = os.getenv("MAIL_FROM")
+    MAIL_FROM_NAME: str = os.getenv("APP_NAME")
+    MAIL_STARTTLS: bool = True
+    MAIL_SSL_TLS: bool = False
+    USE_CREDENTIALS: bool = True
+    VALIDATE_CERTS: bool = True
     # DOMAIN: str
-    model_config = SettingsConfigDict(env_file="..env", extra="ignore")
+
+    # Frontend url
+    FRONTEND_HOST: str = os.getenv("FRONTEND_HOST")
+    APP_NAME: str = os.getenv("APP_NAME")
+    # model_config = SettingsConfigDict(env_file="../../.env", extra="ignore")
 
 try:
     Config = Settings()
 except Exception as e:
     print(f"Error: {str(e)}")
     raise e
-    

@@ -10,3 +10,6 @@ def generate_unique_key():
     unique_id = ''.join(secrets.choice(characters) for _ in range(length))
 
     return unique_id
+
+def unique_string(byte: int = 8) -> str:
+    return secrets.token_urlsafe(byte)

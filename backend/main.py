@@ -24,7 +24,7 @@ app.add_middleware(
 app.include_router(user_router, prefix="/api/v1/user", tags=["User"])
 
 @app.get("/", tags=["Root"])
-def homepahe():
+def root():
     return {"message": "Welcome to FastAPI CRUD Appication!"}
 
 @app.exception_handler(404)
