@@ -4,6 +4,7 @@ def individual_user_data(data) -> dict:
         "name": data["name"],
         "email": data["email"],
         "password": data["password"],
+        "is_verified": data["is_verified"],
     }
 
 def all_user_data(all_data) -> list:

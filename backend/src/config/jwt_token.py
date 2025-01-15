@@ -1,13 +1,10 @@
 import jwt
-from dotenv import load_dotenv
-from datetime import datetime
-from datetime import timedelta
-import os
-load_dotenv()
+from datetime import datetime, timedelta
+from src.config.env_setting import Config
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
-JWT_EXPIRY_DAY = int(os.getenv("JWT_EXPIRY_DAY")) 
+JWT_SECRET_KEY = Config.JWT_SECRET_KEY
+JWT_ALGORITHM = Config.JWT_ALGORITHM
+JWT_EXPIRY_DAY = Config.JWT_EXPIRY_DAY
 
 def create_jwt_token(payload: dict):
     # manupulate paylod and add expiry time

@@ -1,5 +1,7 @@
 import bcrypt
 
+SPECIAL_CHARACTERS = ['@', '#', '$', '%', '=', ':', '?', '.', '/', '|', '~', '>']
+
 def encode_and_hash_password(password: str) -> str:
     """Encode and hash the password using bcrypt"""
     # converting password to array of bytes 
@@ -28,3 +30,21 @@ def verify_password(password: str, hashed_password: str) -> bool:
     return is_password_correct
 
     
+def is_password_strong_enough(password: str) -> bool:
+    if len(password) < 8:
+        return False
+
+    if not any(char.isupper() for char in password):
+        return False
+
+    if not any(char.islower() for char in password):
+        return False
+
+    if not any(char.isdigit() for char in password):
+        return False
+
+    if not any(char in SPECIAL_CHARACTERS for char in password):
+        return False
+
+    return True
+
