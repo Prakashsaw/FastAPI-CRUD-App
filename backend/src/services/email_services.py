@@ -1,6 +1,6 @@
 from fastapi import BackgroundTasks
 from src.config.env_setting import Config
-from src.models.user_model import User
+from src.schemas.user_schema import User
 from src.config.email import send_email
 from src.utils.email_context import USER_VERIFY_ACCOUNT, FORGOT_PASSWORD
 from src.config.security import encode_and_hash_password
