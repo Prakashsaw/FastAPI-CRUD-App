@@ -26,9 +26,15 @@ class MongoDBConnection:
             self.client = MongoClient(self.MONGO_URI, server_api=ServerApi('1'))
             self.db = self.client[self.DB_NAME]  # Specify the database name
             # Create all the collections here
+            # users related collections
             self.user_collection = self.db["users"]
+            self.refresh_token_collection = self.db["refresh_tokens"]
+            self.user_session_collection = self.db["user_sessions"]
             self.user_email_verification_token_collection = self.db["user_email_verification_tokens"]
 
+            # Books related collections
+            self.book_collection = self.db["books"]
+            
             # Test the connection
             self.client.admin.command('ping')
             print(f"Successfully connected to MongoDB database: {self.DB_NAME}")

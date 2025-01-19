@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 env_path = Path(".") / ".env"
 load_dotenv(dotenv_path=env_path)
@@ -12,9 +12,14 @@ class Settings(BaseSettings):
     DB_NAME: str = os.getenv("DB_NAME")
 
     # JWT settings
-    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY")
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM")
-    JWT_EXPIRY_DAY: int = os.getenv("JWT_EXPIRY_DAY")
+    JWT_ACCESS_SECRET_KEY: str = os.getenv("JWT_ACCESS_SECRET_KEY")
+    JWT_ACCESS_EXPIRY_MINUTES: int = os.getenv("JWT_ACCESS_EXPIRY_MINUTES")
+    JWT_REFRESH_SECRET_KEY: str = os.getenv("JWT_REFRESH_SECRET_KEY")
+    JWT_REFRESH_EXPIRY_DAYS: int = os.getenv("JWT_REFRESH_EXPIRY_DAYS")
+
+    USER_SESSION_EXPIRY_MINUTES: int = os.getenv("USER_SESSION_EXPIRY_MINUTES")
+    
     # REDIS_URL: str = "redis://localhost:6379/0"
 
     # Email settings
