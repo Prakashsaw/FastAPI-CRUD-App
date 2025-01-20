@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from src.config.jwt_token import decode_jwt_token
-import jwt
+from jwt import ExpiredSignatureError, InvalidTokenError
 from src.config.database import mongo_db_connection
 
 # HTTPBearer for extracting token from Authorization header
@@ -40,9 +40,9 @@ def token_required(is_refresh: bool):
 
             # Return the decoded token data (e.g., user information)
             return data
-        except jwt.ExpiredSignatureError:
+        except ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="Token has expired")
-        except jwt.InvalidTokenError:
+        except InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid token")
         finally:
             # Close the connection

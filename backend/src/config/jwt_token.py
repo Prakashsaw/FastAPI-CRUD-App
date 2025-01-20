@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from jwt import InvalidTokenError, ExpiredSignatureError
 import jwt
 from datetime import datetime, timedelta
 from src.config.env_setting import Config
@@ -37,9 +38,9 @@ def decode_jwt_token(token: str, is_refresh: bool):
         payload = jwt.decode(token, secrete_key, algorithms=[JWT_ALGORITHM])
         # print("Decoded Token user data: ", payload)
         return payload
-    except jwt.ExpiredSignatureError:
+    except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired!")
-    except jwt.InvalidTokenError:
+    except InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token!")
     except Exception as e:
         return {"error": str(e)}
