@@ -9,9 +9,6 @@ class LoginUser(BaseModel):
     email: str
     password: str
 
-class RefreshToken(BaseModel):
-    refresh_token: str
-
 class RefreshTokenStore(BaseModel):
     user_id: str
     email: str

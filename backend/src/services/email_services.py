@@ -1,9 +1,9 @@
 from fastapi import BackgroundTasks
-from src.config.env_setting import Config
+from src.config.env_setting import Settings
 from src.schemas.user_schema import User
-from src.config.email import send_email
+from src.config.email_config import send_email
 from src.utils.email_context import USER_VERIFY_ACCOUNT, FORGOT_PASSWORD
-from src.config.security import encode_and_hash_password
+
 
 
 
@@ -11,6 +11,7 @@ async def send_account_verification_email(user: User, background_tasks: Backgrou
     # string_context = user.get_context_string(context=USER_VERIFY_ACCOUNT)
     # token = encode_and_hash_password(string_context)
     # activate_url = f"{Config.FRONTEND_HOST}/auth/account-verify?token={token}&email={user.email}"
+    Config = Settings()
     data = {
         'app_name': Config.APP_NAME,
         "name": user["name"],
@@ -27,6 +28,7 @@ async def send_account_verification_email(user: User, background_tasks: Backgrou
     
     
 async def send_account_activation_confirmation_email(user: User, background_tasks: BackgroundTasks):
+    Config = Settings()
     data = {
         'app_name': Config.APP_NAME,
         "name": user["name"],
@@ -45,6 +47,7 @@ async def send_password_reset_email(user: User, background_tasks: BackgroundTask
     # string_context = user.get_context_string(context=FORGOT_PASSWORD)
     # token = encode_and_hash_password(string_context)
     # reset_url = f"{Config.FRONTEND_HOST}/reset-password?token={token}&email={user.email}"
+    Config = Settings()
     data = {
         'app_name': Config.APP_NAME,
         "name": user["name"],

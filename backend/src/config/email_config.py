@@ -2,19 +2,22 @@ import os
 from pathlib import Path
 from fastapi_mail import FastMail, MessageSchema, MessageType, ConnectionConfig
 from fastapi.background import BackgroundTasks
-from src.config.env_setting import Config
+from src.config.env_setting import Settings
 
+Config = Settings()
+
+# Email Configuration
 conf = ConnectionConfig(
-    MAIL_USERNAME=Config.MAIL_USERNAME,
-    MAIL_PASSWORD=Config.MAIL_PASSWORD,
-    MAIL_PORT=Config.MAIL_PORT,
-    MAIL_SERVER=Config.MAIL_SERVER,
-    MAIL_STARTTLS=Config.MAIL_STARTTLS,
-    MAIL_SSL_TLS=Config.MAIL_SSL_TLS,
-    MAIL_DEBUG=True,
-    MAIL_FROM=Config.MAIL_FROM,
+    MAIL_USERNAME = Config.MAIL_USERNAME,
+    MAIL_PASSWORD = Config.MAIL_PASSWORD,
+    MAIL_FROM = Config.MAIL_FROM,
+    MAIL_FROM_NAME = Config.MAIL_FROM_NAME,
+    MAIL_PORT = Config.MAIL_PORT,
+    MAIL_SERVER = Config.MAIL_SERVER,
+    MAIL_STARTTLS = Config.MAIL_STARTTLS,
+    MAIL_SSL_TLS = Config.MAIL_SSL_TLS,
+    USE_CREDENTIALS = Config.USE_CREDENTIALS,
     TEMPLATE_FOLDER=Path(__file__).parent.parent / "templates",
-    USE_CREDENTIALS=True,
 )
 
 fm = FastMail(conf)

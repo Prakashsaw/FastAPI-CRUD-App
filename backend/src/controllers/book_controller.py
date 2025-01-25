@@ -3,9 +3,10 @@ from fastapi import HTTPException, status
 from typing import List
 from fastapi.responses import JSONResponse
 from datetime import datetime
-from src.config.database import mongo_db_connection
+from src.config.database import MongoDBConnection
 from src.utils.generate_unique_key import generate_unique_key
 from src.serializers.book_serializer import book_data, all_books_data
+from src.config.env_setting import Settings
 
 class BookControllersClass:
     # Add book controller
@@ -14,6 +15,9 @@ class BookControllersClass:
         Add book controller.
         """
         try:
+            Config = Settings()
+            mongo_db_connection = MongoDBConnection(Config.MONGO_URI, Config.DB_NAME)
+
             add_payload = {}
             # Add the user_id to the payload
             unique_id = generate_unique_key()
@@ -49,13 +53,13 @@ class BookControllersClass:
                     selialized_inserted_book = book_data(inserted_book)
                     return JSONResponse(status_code=status.HTTP_201_CREATED, content={"status":"success", "message":"Book added successfully.", "book":selialized_inserted_book})
                 else:
-                    raise HTTPException(status_code=500, detail="Failed to get inserted book" )
+                    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to get inserted book" )
                 
             else:
-                raise HTTPException(status_code=500, detail="Failed to add book" )
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to add book" )
             
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+            raise e
         finally:
             # Close the connection
             mongo_db_connection.close_connection()
@@ -66,6 +70,9 @@ class BookControllersClass:
         Get all books controller.
         """
         try:
+            Config = Settings()
+            mongo_db_connection = MongoDBConnection(Config.MONGO_URI, Config.DB_NAME)
+
             # Start the connection and get the book collection
             mongo_db_connection.start_connection()
             book_collection = mongo_db_connection.get_collection("books")
@@ -74,9 +81,9 @@ class BookControllersClass:
                 serialized_books = all_books_data(all_books)
                 return JSONResponse(status_code=status.HTTP_200_OK, content={"status":"success", "message":"All the books fetched successfully.", "books":serialized_books})
             else:
-                raise HTTPException(status_code=404, detail="No books found")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No books found")
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+            raise e
         finally:
             # Close the connection
             mongo_db_connection.close_connection()
@@ -87,6 +94,9 @@ class BookControllersClass:
         Get book by ID controller.
         """
         try:
+            Config = Settings()
+            mongo_db_connection = MongoDBConnection(Config.MONGO_URI, Config.DB_NAME)
+
             # Start the connection and get the book collection
             mongo_db_connection.start_connection()
             book_collection = mongo_db_connection.get_collection("books")
@@ -95,9 +105,9 @@ class BookControllersClass:
                 serialized_book = book_data(book)
                 return JSONResponse(status_code=status.HTTP_200_OK, content={"status":"success", "message":"Book fetched successfully.", "book":serialized_book})
             else:
-                raise HTTPException(status_code=404, detail="No book found")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No book found")
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+            raise e
         finally:
             # Close the connection
             mongo_db_connection.close_connection()
@@ -108,6 +118,9 @@ class BookControllersClass:
         Update book controller.
         """
         try:
+            Config = Settings()
+            mongo_db_connection = MongoDBConnection(Config.MONGO_URI, Config.DB_NAME)
+
             # Start the connection and get the book collection
             mongo_db_connection.start_connection()
             book_collection = mongo_db_connection.get_collection("books")
@@ -120,11 +133,11 @@ class BookControllersClass:
                     serialized_updated_book = book_data(updated_book)
                     return JSONResponse(status_code=status.HTTP_200_OK, content={"status":"success", "message":"Book updated successfully.", "book":serialized_updated_book})
                 else:
-                    raise HTTPException(status_code=500, detail="Failed to get updated book" )
+                    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to get updated book" )
             else:
-                raise HTTPException(status_code=500, detail="Failed to update book" )
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Failed to update book! Book with this book_id doesn't exist." )
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+            raise e
         finally:
             # Close the connection
             mongo_db_connection.close_connection()
@@ -135,6 +148,9 @@ class BookControllersClass:
         Delete book controller.
         """
         try:
+            Config = Settings()
+            mongo_db_connection = MongoDBConnection(Config.MONGO_URI, Config.DB_NAME)
+
             # Start the connection and get the book collection
             mongo_db_connection.start_connection()
             book_collection = mongo_db_connection.get_collection("books")
@@ -142,9 +158,9 @@ class BookControllersClass:
             if delete_res.deleted_count:
                 return JSONResponse(status_code=status.HTTP_200_OK, content={"status":"success", "message":"Book deleted successfully."})
             else:
-                raise HTTPException(status_code=500, detail="Failed to delete book" )
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Failed to delete book! Book with this book_id doesn't exist." )
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+            raise e
         finally:
             # Close the connection
             mongo_db_connection.close_connection()
