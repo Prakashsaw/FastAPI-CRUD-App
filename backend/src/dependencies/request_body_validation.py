@@ -1,6 +1,5 @@
 # Dependency to check for empty body
-from fastapi import FastAPI, Request, HTTPException, Depends, status
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Request, HTTPException, status
 
 async def validate_body(request: Request):
     # if in request itself body is empty then raise an exception

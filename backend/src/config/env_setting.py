@@ -25,14 +25,13 @@ class Settings(BaseSettings):
     # Email settings
     MAIL_USERNAME: str = os.getenv("MAIL_USERNAME")
     MAIL_PASSWORD: str = os.getenv("MAIL_PASSWORD")
+    MAIL_FROM: str = os.getenv("MAIL_FROM")
+    MAIL_FROM_NAME: str = os.getenv("MAIL_FROM_NAME")
     MAIL_PORT: int = os.getenv("MAIL_PORT")
     MAIL_SERVER: str = os.getenv("MAIL_SERVER")
-    MAIL_FROM: str = os.getenv("MAIL_FROM")
-    MAIL_FROM_NAME: str = os.getenv("APP_NAME")
-    MAIL_STARTTLS: bool = True
-    MAIL_SSL_TLS: bool = False
-    USE_CREDENTIALS: bool = True
-    VALIDATE_CERTS: bool = True
+    MAIL_STARTTLS: bool = os.getenv("MAIL_STARTTLS")
+    MAIL_SSL_TLS: bool = os.getenv("MAIL_SSL_TLS")
+    USE_CREDENTIALS: bool = os.getenv("USE_CREDENTIALS")
     # DOMAIN: str
 
     # Frontend url
@@ -40,8 +39,3 @@ class Settings(BaseSettings):
     APP_NAME: str = os.getenv("APP_NAME")
     # model_config = SettingsConfigDict(env_file="../../.env", extra="ignore")
 
-try:
-    Config = Settings()
-except Exception as e:
-    print(f"Error: {str(e)}")
-    raise e

@@ -2,7 +2,6 @@
 
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
-from src.config.env_setting import Config
 
 class MongoDBConnection:
     """
@@ -61,11 +60,4 @@ class MongoDBConnection:
         if self.client:
             self.client.close()
             print("MongoDB connection closed.")
-
-# Instantiate the MongoDBConnection class
-try:
-    mongo_db_connection = MongoDBConnection(Config.MONGO_URI, Config.DB_NAME)
-except Exception as e:
-    print(f"Error: {str(e)}")
-    raise e
 

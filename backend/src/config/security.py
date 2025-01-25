@@ -1,36 +1,43 @@
 import bcrypt
 
-SPECIAL_CHARACTERS = ['@', '#', '$', '%', '=', ':', '?', '.', '/', '|', '~', '>']
-
 def encode_and_hash_password(password: str) -> str:
-    """Encode and hash the password using bcrypt"""
-    # converting password to array of bytes 
-    encoded_password = password.encode('utf-8') 
+    try:
+        """Encode and hash the password using bcrypt"""
+        # converting password to array of bytes 
+        encoded_password = password.encode('utf-8') 
 
-    # generating the salt 
-    salt = bcrypt.gensalt() 
+        # generating the salt 
+        salt = bcrypt.gensalt() 
 
-    # Hashing the password 
-    hashed_password = bcrypt.hashpw(encoded_password, salt) 
+        # Hashing the password 
+        hashed_password = bcrypt.hashpw(encoded_password, salt) 
 
-    decoded_hashed_password = hashed_password.decode('utf-8') 
+        decoded_hashed_password = hashed_password.decode('utf-8') 
 
-    return decoded_hashed_password
+        return decoded_hashed_password
+    except Exception as e:
+        raise e
 
 def verify_password(password: str, hashed_password: str) -> bool:
-    """Check if the password matches with the hashed password"""
-    # converting password to array of bytes 
-    encoded_password = password.encode('utf-8') 
+    try:
+        """Check if the password matches with the hashed password"""
+        # converting password to array of bytes 
+        encoded_password = password.encode('utf-8') 
 
-    encoded_hashed_password = hashed_password.encode('utf-8')
+        encoded_hashed_password = hashed_password.encode('utf-8')
 
-    # checking if the password matches with the hashed password 
-    is_password_correct = bcrypt.checkpw(encoded_password, encoded_hashed_password)
+        # checking if the password matches with the hashed password 
+        is_password_correct = bcrypt.checkpw(encoded_password, encoded_hashed_password)
 
-    return is_password_correct
+        return is_password_correct
+    except Exception as e:
+        raise e
 
     
 def is_password_strong_enough(password: str) -> bool:
+
+    SPECIAL_CHARACTERS = ['@', '#', '$', '%', '=', ':', '?', '.', '/', '|', '~', '>']
+
     if len(password) < 8:
         return False
 

@@ -1,8 +1,6 @@
 # Book routes
 from fastapi import APIRouter, Depends
-from typing import List
 from src.dependencies.user_auth_dependency import token_required
-from src.dependencies.request_body_validation import validate_body
 from src.schemas.book_schema import AddBookRequest, UpdateBookRequest 
 from src.controllers.book_controller import BookControllersClass
 

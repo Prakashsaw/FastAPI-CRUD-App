@@ -1,8 +1,9 @@
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from src.config.jwt_token import decode_jwt_token
 from jwt import ExpiredSignatureError, InvalidTokenError
-from src.config.database import mongo_db_connection
+from src.config.database import MongoDBConnection
+from src.config.env_setting import Settings
 
 # HTTPBearer for extracting token from Authorization header
 security = HTTPBearer()
@@ -21,6 +22,9 @@ def token_required(is_refresh: bool):
         token = credentials.credentials  # Extract the token from the header
         # print("token: ", token)
         try:
+            Config = Settings()
+            mongo_db_connection = MongoDBConnection(Config.MONGO_URI, Config.DB_NAME)
+            mongo_db_connection.start_connection()
             # Decode the token
             # print("is_refresh: ", is_refresh)
             data = decode_jwt_token(token, is_refresh)
@@ -32,11 +36,13 @@ def token_required(is_refresh: bool):
             # We need to check this because the user might have logged out or logged In in another devide and the session_id might have been deleted from the database
             # If the session_id (means user session) does not exist in the database, then we need to invalidate the token
             session_id = data.get("session_id")
-            mongo_db_connection.start_connection()
             user_session_collection = mongo_db_connection.get_collection("user_sessions")
             user_session = user_session_collection.find_one({"session_id": session_id})
             if not user_session:
-                raise HTTPException(status_code=401, detail="Invalid token. User session does not exist.")
+                raise HTTPException(status_code=401, detail={
+                    "device_logged_out": True,
+                    "message": "Invalid token. User session does not exist."
+                })
 
             # Return the decoded token data (e.g., user information)
             return data
@@ -44,6 +50,8 @@ def token_required(is_refresh: bool):
             raise HTTPException(status_code=401, detail="Token has expired")
         except InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid token")
+        except Exception as e:
+            raise e
         finally:
             # Close the connection
             mongo_db_connection.close_connection()

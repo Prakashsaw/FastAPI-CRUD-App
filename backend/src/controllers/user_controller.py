@@ -1,17 +1,20 @@
-from fastapi import HTTPException, BackgroundTasks, Depends, status
+from fastapi import HTTPException, status, BackgroundTasks
 import re
 from datetime import datetime
-from src.config.database import mongo_db_connection
-from src.serializers.user_serializer import all_user_data, individual_user_data
+from src.config.database import MongoDBConnection
+from src.serializers.user_serializer import individual_user_data
 from src.config.security import encode_and_hash_password, verify_password, is_password_strong_enough
 from src.utils.generate_unique_key import generate_unique_key
-from src.config.jwt_token import create_access_token, create_refresh_token, decode_jwt_token
-# from app.controllers.send_email_controller import send_account_verification_email
-from src.config.env_setting import Config
+from src.config.jwt_token import create_access_token, create_refresh_token
+from fastapi.responses import JSONResponse
+from src.config.env_setting import Settings
 
 class UserControllersClass:
     async def signup_user(self, user: dict):
         try:
+            Config = Settings()
+            mongo_db_connection = MongoDBConnection(Config.MONGO_URI, Config.DB_NAME)
+
             # Start the connection
             mongo_db_connection.start_connection()
             
@@ -28,11 +31,11 @@ class UserControllersClass:
             # check that email format is correct or not
             email_string_match = r"\"?([-a-zA-Z0-9.`?{}]+@\w+\.\w+)\"?"
             if not re.match(email_string_match, user["email"]):
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email is not valid!")
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email is not valid! Email format should be: test@example.com, email@domain.com, ect...")
             
             # Password should be strong enough
             if not is_password_strong_enough(user["password"]):
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please provide a strong password.")
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please provide a strong password. Password should be at least 8 characters long and should contain at least one uppercase letter, one lowercase letter, one number and one special character. Example: Test@123, StrongPassword!123")
             
             # Get the user collection
             user_collection = mongo_db_connection.get_collection("users")
@@ -43,20 +46,12 @@ class UserControllersClass:
 
             # Generate unique id for the user
             unique_id = generate_unique_key()
-            # Now add the unique_id to the user dict
-            user["user_id"] = unique_id
-            user["is_verified"] = False
             created_at = str(datetime.now())
             updated_at = str(datetime.now())
-            user["created_at"] = created_at
-            user["updated_at"] = updated_at
-
-            # user["is_verified"] = False
 
             # First extract the password from the user dict
             password = user["password"]
             hashed_password = encode_and_hash_password(password)
-            user["password"] = hashed_password
 
             # user_email = user["email"]
             # activate_url = f"{Config.FRONTEND_HOST}/auth/account-verify?token={token}&email={user_email}"
@@ -64,14 +59,28 @@ class UserControllersClass:
             # print("Res1: ", res1)
 
             # print("User: ", user)
-            new_user = user_collection.insert_one(user)
-            created_user = user_collection.find_one({"user_id": user["user_id"]})
-
-            return {"status_code": status.HTTP_201_CREATED, "message": "User created successfully. Please login to continue.", "created_user": individual_user_data(created_user)}
+            # Now make the payload for the user
+            user_payload = {"user_id": unique_id,
+                            "name": user["name"],
+                            "email": user["email"],
+                            "password": hashed_password,
+                            "is_verified": False,
+                            "created_at": created_at,
+                            "updated_at": updated_at 
+                            }
             
-            # return {"status_code": status.HTTP_201_CREATED, "message": "User created successfully!", "created_user": individual_user_data(created_user)}
+            new_user = user_collection.insert_one(user_payload)
+            if new_user.inserted_id is None:
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="User not created! Please try again.")
+            
+            created_user = user_collection.find_one({"user_id": user_payload["user_id"]})
+
+            # return {"status_code": status.HTTP_201_CREATED, "message": "User created successfully. Please login to continue.", "created_user": individual_user_data(created_user)}
+            # Json response
+            return JSONResponse(status_code=status.HTTP_201_CREATED, content={"status":"success", "message":"User created successfully. Please login to continue.", "user":individual_user_data(created_user)})
+            
         except Exception as e:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error: {str(e)}")
+            raise e
         
         finally:
             # Close the connection
@@ -79,6 +88,9 @@ class UserControllersClass:
         
     async def login_user(self, user: dict):
         try:
+            Config = Settings()
+            mongo_db_connection = MongoDBConnection(Config.MONGO_URI, Config.DB_NAME)
+
             # Start the connection
             mongo_db_connection.start_connection()
 
@@ -90,7 +102,6 @@ class UserControllersClass:
             password = user["password"]
 
             if email == "" or password == "":
-                # return {"status_code": 400, "message": "All fields are required!"}
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="All fields are required!")
             
             # Get the user collection
@@ -100,8 +111,7 @@ class UserControllersClass:
             # print("User: ", user)
             
             if user is None:
-                # return {"status_code": 404, "message": "User does not exist!"}
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist!")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User doesn't exist!")
             
             # verify the password
             user_hashed_password = user["password"]
@@ -141,9 +151,10 @@ class UserControllersClass:
             # Store the refresh token in the database
             refresh_token_collection.insert_one({"user_id": user["user_id"], "email": user["email"], "refresh_token": jwt_refresh_token})
 
-            return {"status_code": status.HTTP_200_OK, "message": "User logged in successfully!", "user": individual_user_data(user), "jwt_access_token": jwt_access_token, "jwt_refresh_token": jwt_refresh_token, "session_id": session_id}
+            return JSONResponse(status_code=status.HTTP_200_OK, content={"status":"success", "message":"User logged in successfully!", "user":individual_user_data(user), "jwt_access_token": jwt_access_token, "jwt_refresh_token": jwt_refresh_token, "session_id": session_id})
+        
         except Exception as e:
-            return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error: {str(e)}")
+            raise e
         
         finally:
             # Close the connection
@@ -151,6 +162,9 @@ class UserControllersClass:
         
     async def refresh_token_controller(self, decoded_token_payload: dict):
         try:
+            Config = Settings()
+            mongo_db_connection = MongoDBConnection(Config.MONGO_URI, Config.DB_NAME)
+
             # Start the connection
             mongo_db_connection.start_connection()
             
@@ -180,9 +194,10 @@ class UserControllersClass:
             # Fetch the refresh token from the database
             jwt_refresh_token = refresh_token_store["refresh_token"]
 
-            return {"status_code": status.HTTP_200_OK, "message": "Access token refreshed successfully!", "jwt_access_token": jwt_access_token, "jwt_refresh_token": jwt_refresh_token, "session_id": session_id}
+            return JSONResponse(status_code=status.HTTP_200_OK, content={"status":"success", "message":"Access token refreshed successfully!", "jwt_access_token": jwt_access_token, "jwt_refresh_token": jwt_refresh_token, "session_id": session_id})
+        
         except Exception as e:
-            return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error: {str(e)}")
+            raise e
         
         finally:
             # Close the connection
@@ -191,6 +206,9 @@ class UserControllersClass:
     # User logout controller
     async def logout_user(self, decoded_token_payload: dict):
         try:
+            Config = Settings()
+            mongo_db_connection = MongoDBConnection(Config.MONGO_URI, Config.DB_NAME)
+
             # Start the connection
             mongo_db_connection.start_connection()
             
@@ -206,9 +224,10 @@ class UserControllersClass:
             refresh_tokens_collection = mongo_db_connection.get_collection("refresh_tokens")
             refresh_tokens_collection.delete_one({"user_id": user_id, "email": email})
 
-            return {"status_code": status.HTTP_200_OK, "message": "User logged out successfully!"}
+            return JSONResponse(status_code=status.HTTP_200_OK, content={"status":"success", "message":"User logged out successfully!"})
+        
         except Exception as e:
-            return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error: {str(e)}")
+            return e
         
         finally:
             # Close the connection
