@@ -16,7 +16,7 @@
             margin-bottom: 16px;
         }
         .button {
-            color: #fff;
+            color: white;
             background-color: #007BFF;
             border-color: #007BFF;
             border-radius: .25rem;
@@ -25,20 +25,28 @@
             font-size: 1rem;
             line-height: 1.5;
         }
+        .button a {
+            color: white;
+            text-decoration: none;
+        }
+        .button a:hover {
+            color: #e6bbbb;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
     <div class="email-container">
         <img src="#" alt="logo" class="logo">
-        <h1>Welcome to {{ app_name }}!</h1>
+        <h2>Welcome to {{ app_name }}!</h2>
         <p>Dear {{ name }},</p>
         <p>Thank you for verifying your account. We are really excited to have you in {{ app_name }} family.</p>
         <p>Your account have been activated now. You can sign-in now using below button.</p>
         <p>
-            <a href="{{ login_url }}" target="_blank" class="button">Sign In</a>
+            <button class="button"><a href="{{ login_url }}" target="_blank">Login</a></button>
         </p>
         <p>Thank you for choosing us!</p>
-        <p>Best Regards,<br>{{ app_name }}</p>
+        <p>Best Regards,<br>{{ app_name }}.</p>
     </div>
 </body>
 </html>

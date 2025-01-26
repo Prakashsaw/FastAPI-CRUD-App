@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     MAIL_STARTTLS: bool = os.getenv("MAIL_STARTTLS")
     MAIL_SSL_TLS: bool = os.getenv("MAIL_SSL_TLS")
     USE_CREDENTIALS: bool = os.getenv("USE_CREDENTIALS")
+    VALIDATE_CERTS: bool = os.getenv("VALIDATE_CERTS")
     # DOMAIN: str
 
     # Frontend url
