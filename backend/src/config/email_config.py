@@ -1,4 +1,5 @@
 import os
+from fastapi import HTTPException, status
 from pathlib import Path
 from fastapi_mail import FastMail, MessageSchema, MessageType, ConnectionConfig
 from fastapi.background import BackgroundTasks
@@ -17,11 +18,9 @@ conf = ConnectionConfig(
     MAIL_STARTTLS = Config.MAIL_STARTTLS,
     MAIL_SSL_TLS = Config.MAIL_SSL_TLS,
     USE_CREDENTIALS = Config.USE_CREDENTIALS,
+    VALIDATE_CERTS = Config.VALIDATE_CERTS,
     TEMPLATE_FOLDER=Path(__file__).parent.parent / "templates",
 )
-
-fm = FastMail(conf)
-
 
 async def send_email(recipients: list, subject: str, context: dict, template_name: str, background_tasks: BackgroundTasks):
     message = MessageSchema(
@@ -31,4 +30,32 @@ async def send_email(recipients: list, subject: str, context: dict, template_nam
         subtype=MessageType.html
     )
 
-    background_tasks.add_task(fm.send_message, message, template_name=template_name)
+    fm = FastMail(conf)
+    try:
+        background_tasks.add_task(fm.send_message, message, template_name=template_name)
+        print("message1: ", "Email has been sent successfully!")
+        return True
+    except Exception as e:
+        print(f"Error1: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to send email: {str(e)}"
+        )
+    
+async def test_fastmail():
+    message = MessageSchema(
+        subject="Test Email",
+        recipients=["prakash1999saw@gmail.com"],
+        template_body={"app_name": "FastAPI CRUD App", "name": "Test User", "activate_url": "http://example.com"},
+        subtype=MessageType.html,
+    )
+
+    fm = FastMail(conf)
+    try:
+        await fm.send_message(message, template_name="account-verification.html")
+        # background_tasks.add_task(fm.send_message, message, template_name="account-verification.html")
+        print("Email sent successfully!")
+        return True
+    except Exception as e:
+        print(f"FastMail error: {e}")
+        raise e
+    

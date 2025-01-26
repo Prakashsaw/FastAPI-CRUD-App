@@ -16,7 +16,7 @@
             margin-bottom: 16px;
         }
         .button {
-            color: #fff;
+            color: white;
             background-color: #007BFF;
             border-color: #007BFF;
             border-radius: .25rem;
@@ -25,20 +25,30 @@
             font-size: 1rem;
             line-height: 1.5;
         }
+        .button a {
+            color: white;
+            text-decoration: none;
+        }
+        .button a:hover {
+            color: #e6bbbb;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
     <div class="email-container">
-        <h1>Welcome to {{ app_name }}!</h1>
+        <h2>Welcome to {{ app_name }}!</h2>
         <p>Dear {{ name }},</p>
         <p>Thank you for signing up. Please activate your account by clicking the link below:</p>
         <p>
-            <a href="{{ activate_url }}" class="button">Activate Account</a>
+            <button class="button"><a href="{{ activate_url }}">Activate Account</a></button>
         </p>
         <p>If the button above doesn't work, please copy and paste the following URL into your browser:</p>
         <p><a href="{{ activate_url }}">{{ activate_url }}</a></p>
+        <p>This link will expire in 30 minutes.</p>
+        <p>If you did not sign up for an account, please ignore this email.</p>
         <p>Thank you for choosing us!</p>
-        <p>Best Regards,<br>{{ app_name }}</p>
+        <p>Best Regards,<br>{{ app_name }}.</p>
     </div>
 </body>
 </html>
