@@ -1,8 +1,8 @@
-# Shcemas for books model
 from pydantic import BaseModel
 
-class AddBookRequest(BaseModel): # this is the schema for adding a book and this will remain same for the update book request
-    category: str
+
+class AddBookRequest(BaseModel):
+    """This module contains the schemas for the book model."""
     book_title: str
     book_author: str
     book_price: float
@@ -12,9 +12,11 @@ class AddBookRequest(BaseModel): # this is the schema for adding a book and this
     language: str
     book_rating: float
     book_image: str
+
     
 
 class Book(BaseModel):
+    """This module contains the schemas for the book model."""
     user_id: str # for the reference of the user who added the book
     book_id: str
     category: str
@@ -30,7 +32,9 @@ class Book(BaseModel):
     created_at: str
     updated_at: str
 
+
 class UpdateBookRequest(BaseModel):
+    """This module contains the schemas for the book model."""
     category: str
     book_title: str
     book_author: str

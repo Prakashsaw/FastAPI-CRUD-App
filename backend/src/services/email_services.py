@@ -1,75 +1,87 @@
-from fastapi import BackgroundTasks
+import logging
+
+from fastapi import BackgroundTasks, HTTPException
+
 from src.config.env_setting import Settings
-from src.schemas.user_schema import User
 from src.config.email_config import send_email
-from src.utils.email_context import USER_VERIFY_ACCOUNT, FORGOT_PASSWORD
+
+
+# Set up logging for better traceability
+logger = logging.getLogger(__name__)
 
 
 class EmailServices:
-    # Initialize the class
+    """
+    A class for email services, such as sending account verification and password reset emails.
+    """
     def __init__(self):
-        pass
+        self.config = Settings()
 
-    # Send account verification email
     async def send_account_verification_email(self, user: dict, background_tasks: BackgroundTasks, activate_url: str):
-        Config = Settings()
+        """
+        Sends an account verification email to the user.
+        """
         data = {
-            'app_name': Config.APP_NAME,
+            'app_name': self.config.APP_NAME,
             "name": user["name"],
             'activate_url': activate_url
         }
-        subject = f"Account Verification - {Config.APP_NAME}"
+        subject = f"Account Verification - {self.config.APP_NAME}"
         try:
-            res = await send_email(
+            # Send the email asynchronously
+            return await send_email(
                 recipients=[user["email"]],
                 subject=subject,
                 template_name="account-verification.html",
                 context=data,
                 background_tasks=background_tasks
             )
-            return res
         except Exception as e:
-            # print("Error2:", e)
-            raise e
-        
-    # Send account activation confirmation email
+            logger.error(f"Error sending account verification email to {user['email']}: {str(e)}")
+            raise HTTPException(status_code=500, detail="Error sending verification email")
+
     async def send_account_verification_confirmation_email(self, user: dict, background_tasks: BackgroundTasks):
-        Config = Settings()
+        """
+        Sends an account activation confirmation email to the user.
+        """
         data = {
-            'app_name': Config.APP_NAME,
+            'app_name': self.config.APP_NAME,
             "name": user["name"],
-            'login_url': f'{Config.FRONTEND_HOST}/login'
+            'login_url': f'{self.config.FRONTEND_HOST}/login'
         }
-        subject = f"Welcome - {Config.APP_NAME}"
+        subject = f"Welcome - {self.config.APP_NAME}"
         try:
-            res = await send_email(
+            # Send the email asynchronously
+            return await send_email(
                 recipients=[user["email"]],
                 subject=subject,
                 template_name="account-verification-confirmation.html",
                 context=data,
                 background_tasks=background_tasks
             )
-            return res
         except Exception as e:
-            # print("Error3:", e)
-            raise e
-        
-    # Send password reset email
+            logger.error(f"Error sending account confirmation email to {user['email']}: {str(e)}")
+            raise HTTPException(status_code=500, detail="Error sending confirmation email")
+
     async def send_password_reset_email(self, user: dict, background_tasks: BackgroundTasks, reset_url: str):
-        # string_context = user.get_context_string(context=FORGOT_PASSWORD)
-        # token = encode_and_hash_password(string_context)
-        # reset_url = f"{Config.FRONTEND_HOST}/reset-password?token={token}&email={user.email}"
-        Config = Settings()
+        """
+        Sends a password reset email to the user.
+        """
         data = {
-            'app_name': Config.APP_NAME,
+            'app_name': self.config.APP_NAME,
             "name": user["name"],
             'activate_url': reset_url,
         }
-        subject = f"Reset Password - {Config.APP_NAME}"
-        await send_email(
-            recipients=[user["email"]],
-            subject=subject,
-            template_name="user_email/password-reset.html",
-            context=data,
-            background_tasks=background_tasks
-        )
+        subject = f"Reset Password - {self.config.APP_NAME}"
+        try:
+            # Send the email asynchronously
+            await send_email(
+                recipients=[user["email"]],
+                subject=subject,
+                template_name="user_email/password-reset.html",
+                context=data,
+                background_tasks=background_tasks
+            )
+        except Exception as e:
+            logger.error(f"Error sending password reset email to {user['email']}: {str(e)}")
+            raise HTTPException(status_code=500, detail="Error sending password reset email")
