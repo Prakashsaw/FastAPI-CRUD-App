@@ -1,57 +1,90 @@
 import bcrypt
+from typing import Optional
 
-def encode_and_hash_password(password: str) -> str:
-    try:
-        """Encode and hash the password using bcrypt"""
-        # converting password to array of bytes 
-        encoded_password = password.encode('utf-8') 
 
-        # generating the salt 
-        salt = bcrypt.gensalt() 
+class PasswordManager:
+    """
+    A class to handle password hashing, verification, and strength validation.
+    """
 
-        # Hashing the password 
-        hashed_password = bcrypt.hashpw(encoded_password, salt) 
+    @staticmethod
+    def encode_and_hash_password(password: str) -> str:
+        """
+        Hash a password using bcrypt.
 
-        decoded_hashed_password = hashed_password.decode('utf-8') 
+        :param password: The password to hash.
+        :return: The hashed password as a string.
+        :raises ValueError: If the password is empty or invalid.
+        """
+        if not password:
+            raise ValueError("Password cannot be empty.")
 
-        return decoded_hashed_password
-    except Exception as e:
-        raise e
+        try:
+            # Convert password to bytes
+            encoded_password = password.encode('utf-8')
 
-def verify_password(password: str, hashed_password: str) -> bool:
-    try:
-        """Check if the password matches with the hashed password"""
-        # converting password to array of bytes 
-        encoded_password = password.encode('utf-8') 
+            # Generate salt and hash the password
+            salt = bcrypt.gensalt()
+            hashed_password = bcrypt.hashpw(encoded_password, salt)
 
-        encoded_hashed_password = hashed_password.encode('utf-8')
+            # Return the hashed password as a string
+            return hashed_password.decode('utf-8')
+        except Exception as e:
+            raise RuntimeError(f"Error encoding and hashing password: {str(e)}")
 
-        # checking if the password matches with the hashed password 
-        is_password_correct = bcrypt.checkpw(encoded_password, encoded_hashed_password)
+    @staticmethod
+    def verify_password(password: str, hashed_password: str) -> bool:
+        """
+        Verify if the provided password matches the hashed password.
 
-        return is_password_correct
-    except Exception as e:
-        raise e
+        :param password: The password to verify.
+        :param hashed_password: The hashed password to compare against.
+        :return: True if the password matches the hashed password, False otherwise.
+        :raises ValueError: If either password or hashed_password is empty or invalid.
+        """
+        if not password or not hashed_password:
+            raise ValueError("Password and hashed password cannot be empty.")
 
-    
-def is_password_strong_enough(password: str) -> bool:
+        try:
+            # Convert both password and hashed password to bytes
+            encoded_password = password.encode('utf-8')
+            encoded_hashed_password = hashed_password.encode('utf-8')
 
-    SPECIAL_CHARACTERS = ['@', '#', '$', '%', '=', ':', '?', '.', '/', '|', '~', '>']
+            # Verify if the password matches the hashed password
+            return bcrypt.checkpw(encoded_password, encoded_hashed_password)
+        except Exception as e:
+            raise RuntimeError(f"Error verifying password: {str(e)}")
 
-    if len(password) < 8:
-        return False
+    @staticmethod
+    def is_password_strong_enough(password: str) -> bool:
+        """
+        Check if the provided password meets the strength requirements.
 
-    if not any(char.isupper() for char in password):
-        return False
+        Password must contain at least:
+        - 8 characters
+        - One uppercase letter
+        - One lowercase letter
+        - One digit
+        - One special character from a predefined set
 
-    if not any(char.islower() for char in password):
-        return False
+        :param password: The password to check.
+        :return: True if the password is strong enough, False otherwise.
+        """
+        SPECIAL_CHARACTERS = {'@', '#', '$', '%', '=', ':', '?', '.', '/', '|', '~', '>'}
 
-    if not any(char.isdigit() for char in password):
-        return False
+        if len(password) < 8:
+            return False
 
-    if not any(char in SPECIAL_CHARACTERS for char in password):
-        return False
+        if not any(char.isupper() for char in password):
+            return False
 
-    return True
+        if not any(char.islower() for char in password):
+            return False
 
+        if not any(char.isdigit() for char in password):
+            return False
+
+        if not any(char in SPECIAL_CHARACTERS for char in password):
+            return False
+
+        return True

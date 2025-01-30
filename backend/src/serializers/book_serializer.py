@@ -1,4 +1,7 @@
 def book_data(data) -> dict:
+    """
+    Serialize book data.
+    """
     return {
         "user_id": data["user_id"],
         "book_id": data["book_id"],
@@ -18,4 +21,7 @@ def book_data(data) -> dict:
     
 
 def all_books_data(all_data) -> list:
+    """
+    Serialize all books data.
+    """
     return [book_data(data) for data in all_data]
