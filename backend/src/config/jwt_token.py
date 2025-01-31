@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 import jwt
 from jwt import InvalidTokenError, ExpiredSignatureError
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from src.config.env_setting import Settings
 
@@ -26,7 +26,7 @@ class JWTManager:
         :param payload: The payload to encode in the token.
         :return: The generated JWT access token.
         """
-        payload["exp"] = datetime.now() + timedelta(minutes=self.access_expiry_minutes)
+        payload["exp"] = datetime.now(timezone.utc) + timedelta(minutes=self.access_expiry_minutes)
         try:
             return jwt.encode(payload, self.access_secret, algorithm=self.algorithm)
         except Exception as e:
@@ -39,7 +39,7 @@ class JWTManager:
         :param payload: The payload to encode in the token.
         :return: The generated JWT refresh token.
         """
-        payload["exp"] = datetime.now() + timedelta(days=self.refresh_expiry_days)
+        payload["exp"] = datetime.now(timezone.utc) + timedelta(days=self.refresh_expiry_days)
         try:
             return jwt.encode(payload, self.refresh_secret, algorithm=self.algorithm)
         except Exception as e:
@@ -55,7 +55,8 @@ class JWTManager:
         """
         secret_key = self.refresh_secret if is_refresh else self.access_secret
         try:
-            return jwt.decode(token, secret_key, algorithms=[self.algorithm])
+            payload = jwt.decode(token, secret_key, algorithms=[self.algorithm])
+            return payload
         except ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="Token has expired!")
         except InvalidTokenError:
