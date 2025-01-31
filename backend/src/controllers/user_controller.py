@@ -316,3 +316,86 @@ class UserControllersClass:
             raise e
         finally:
             self._close_connection()
+
+    async def send_password_reset_email_controller(self, email: str, background_tasks: BackgroundTasks):
+        """
+        Handle the forgot password email request by sending the reset password link.
+
+        Args:
+            email (str): The user's email address.
+            background_tasks (BackgroundTasks): Background task manager for sending emails.
+
+        Returns:
+            JSONResponse: The response message.
+        """
+        try:
+            if not email or email == "":
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email is required!")
+            
+            user_collection = self._get_collection("users")
+            user = user_collection.find_one({"email": email})
+            if user is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User doesn't exist!")
+
+            # Generate the reset password token
+            payload = {"user_id": user["user_id"], "email": user["email"]}
+            reset_password_token = self.jwt_manager.create_access_token(payload)
+            reset_password_url = f"{self.Config.FRONTEND_HOST}/user-auth/reset-password?token={reset_password_token}&email={user['email']}"
+
+            # Send the reset password email
+            res = await self.email_services.send_password_reset_email(user, background_tasks, reset_password_url)
+            if not res:
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send reset password email!")
+
+            return JSONResponse(status_code=status.HTTP_200_OK, content={"status": "success", "message": "Reset password link sent successfully. Please check your email."})
+
+        except Exception as e:
+            raise e
+        finally:
+            self._close_connection()
+
+    async def password_reset_controller(self, token: str, new_password: str, background_tasks: BackgroundTasks):
+        """
+        Handle the password reset process by decoding the token and updating the user's password.
+
+        Args:
+            token (str): The reset password token.
+            new_password (str): The new password.
+            background_tasks (BackgroundTasks): Background task manager for sending emails.
+
+        Returns:
+            JSONResponse: The response message.
+        """
+        try:
+            if not new_password or new_password == "":
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="New password is required!")
+            
+            # Validate and decode the token
+            decoded_data_dict = self.jwt_manager.decode_token(token, is_refresh=False)
+            if decoded_data_dict.get("error"):
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=decoded_data_dict["error"])
+
+            user_id = decoded_data_dict["user_id"]
+            email = decoded_data_dict["email"]
+
+            # Get the user collection
+            user_collection = self._get_collection("users")
+            user = user_collection.find_one({"user_id": user_id, "email": email})
+            if user is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User doesn't exist!")
+
+            # Update the user's password
+            hashed_password = self.password_manager.encode_and_hash_password(new_password)
+            user_collection.find_one_and_update({"user_id": user_id, "email": email}, {"$set": {"password": hashed_password}})
+
+            # Send password reset confirmation email
+            res = await self.email_services.send_password_reset_confirmation_email(user, background_tasks)
+            if not res:
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send password reset confirmation email!")
+
+            return JSONResponse(status_code=status.HTTP_200_OK, content={"status": "success", "message": "Password reset successfully. Login to continue."})
+
+        except Exception as e:
+            raise e
+        finally:
+            self._close_connection()
