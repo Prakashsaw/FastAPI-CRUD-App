@@ -19,11 +19,17 @@ class BookController:
         self.mongo_db_connection = MongoDBConnection(self.Config.MONGO_URI, self.Config.DB_NAME)
         self.collection_name = "books"
 
+    def _start_connection(self):
+        """
+        Helper method to start MongoDB connection.
+        """
+        self.mongo_db_connection.start_connection()
+
     def _get_collection(self, collection_name: str):
         """
         Helper method to get MongoDB collection.
         """
-        self.mongo_db_connection.start_connection()
+        # self.mongo_db_connection.start_connection()
         return self.mongo_db_connection.get_collection(collection_name)
 
     def _close_connection(self):
@@ -57,6 +63,8 @@ class BookController:
         }
 
         try:
+            self._start_connection()
+
             book_collection = self._get_collection(self.collection_name)
             res = book_collection.insert_one(add_payload)
             if res.inserted_id:
@@ -79,6 +87,8 @@ class BookController:
         Fetch all books for a user.
         """
         try:
+            self._start_connection()
+
             book_collection = self._get_collection(self.collection_name)
             all_books = book_collection.find({"user_id": user_id})
             if all_books:
@@ -98,6 +108,8 @@ class BookController:
         Fetch a specific book by ID for a user.
         """
         try:
+            self._start_connection()
+
             book_collection = self._get_collection(self.collection_name)
             book = book_collection.find_one({"user_id": user_id, "book_id": book_id})
             if book:
@@ -117,6 +129,8 @@ class BookController:
         Update a book for a user.
         """
         try:
+            self._start_connection()
+
             book_collection = self._get_collection(self.collection_name)
             update_payload["updated_at"] = str(datetime.now())
             update_res = book_collection.update_one(
@@ -141,6 +155,8 @@ class BookController:
         Delete a book for a user.
         """
         try:
+            self._start_connection()
+            
             book_collection = self._get_collection(self.collection_name)
             delete_res = book_collection.delete_one({"user_id": user_id, "book_id": book_id})
             if delete_res.deleted_count:

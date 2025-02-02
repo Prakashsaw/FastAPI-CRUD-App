@@ -21,11 +21,17 @@ class UserControllersClass:
         self.password_manager = PasswordManager()
         self.jwt_manager = JWTManager()
 
+    def _start_connection(self):
+        """
+        Start the MongoDB connection.
+        """
+        self.mongo_db_connection.start_connection()
+
     def _get_collection(self, collection_name: str):
         """
         Helper method to get MongoDB collection.
         """
-        self.mongo_db_connection.start_connection()
+        # self.mongo_db_connection.start_connection()
         return self.mongo_db_connection.get_collection(collection_name)
 
     def _close_connection(self):
@@ -81,7 +87,7 @@ class UserControllersClass:
         if not res:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send account verification email!")
         
-        return JSONResponse(status_code=status.HTTP_200_OK, content={"status": "failed", "message": "User is not verified! Please check your email and verify your account."})
+        return JSONResponse(status_code=status.HTTP_200_OK, content={"status": "failed", "message": "User is not verified! Please check your email and verify your account.", "user": individual_user_data(fetched_user)})
     
     async def _handle_login_success(self, fetched_user):
         """
@@ -131,6 +137,8 @@ class UserControllersClass:
         Handle the user signup process by validating the input, creating a new user, and sending the email verification link.
         """
         try:
+            self._start_connection()
+
             user = dict(user)
 
             # Validation checks
@@ -141,7 +149,7 @@ class UserControllersClass:
 
             # Check if user already exists
             if user_collection.find_one({"email": user["email"]}):
-                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists!")
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email already exists!")
 
             # Generate unique user ID and hashed password
             unique_id = generate_unique_key()
@@ -181,6 +189,8 @@ class UserControllersClass:
         Handle the user login process by validating the input, checking the user credentials, and generating JWT tokens.
         """
         try:
+            self._start_connection()
+
             user = dict(user)
 
             # Validation checks
@@ -216,6 +226,8 @@ class UserControllersClass:
             background_tasks (BackgroundTasks): Background task manager for sending emails.
         """
         try:
+            self._start_connection()
+
             # Validate and decode the token
             decoded_data_dict = self.jwt_manager.decode_token(token, is_refresh=False)
             if decoded_data_dict.get("error"):
@@ -256,6 +268,8 @@ class UserControllersClass:
             decoded_token_payload (dict): The decoded JWT token payload.
         """
         try:
+            self._start_connection()
+
             user_id = decoded_token_payload["user_id"]
             email = decoded_token_payload["email"]
             session_id = decoded_token_payload["session_id"]
@@ -296,6 +310,8 @@ class UserControllersClass:
             decoded_token_payload (dict): The decoded JWT token payload.
         """
         try:
+            self._start_connection()
+
             decoded_token_payload = self.jwt_manager.decode_jwt_token_without_expirytime(token)
             
             user_id = decoded_token_payload["user_id"]
@@ -329,6 +345,8 @@ class UserControllersClass:
             JSONResponse: The response message.
         """
         try:
+            self._start_connection()
+
             if not email or email == "":
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email is required!")
             
@@ -367,6 +385,8 @@ class UserControllersClass:
             JSONResponse: The response message.
         """
         try:
+            self._start_connection()
+            
             if not new_password or new_password == "":
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="New password is required!")
             

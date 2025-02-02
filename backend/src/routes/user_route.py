@@ -53,7 +53,7 @@ async def reset_password(token: str, request: Request, background_tasks: Backgro
 
 
 # Protected routes
-@user_router.post("/refresh-token", dependencies=[Depends(token_required(is_refresh=True))])
+@user_router.post("/renew-access-token", dependencies=[Depends(token_required(is_refresh=True))])
 async def refresh_token(decoded_token_payload: dict = Depends(token_required(is_refresh=True))):
     """
     Refresh token route.
