@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import Form from "react-validation/build/form";
 import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
+import { isEmail } from "validator";
 
 import AuthService from "../services/auth.service";
 
@@ -44,6 +45,22 @@ const Login = () => {
     form.current.validateAll();
 
     if (checkBtn.current.context._errors.length === 0) {
+      if (!isEmail(email)) {
+        setMessage(
+          "Please enter a valid email address. Examples: test_email@domain.com, example@gmail.com, etc..."
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (password.length < 8) {
+        setMessage(
+          "The password must be 8 characters long. It must contain at least one uppercase letter, one lowercase letter, one number and one special character. Examples: Abc@1234, Strong_Password#1, etc..."
+        );
+        setLoading(false);
+        return;
+      }
+
       AuthService.login(email, password).then(
         (response) => {
           // console.log("response", response);
