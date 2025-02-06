@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api/v1/book";
+// const API_URL = `${BASE_URL}/api/v1/book`;
+const API_URL = "http://localhost:5000/api/v1/user";
 
 const getPublicContent = () => {
   return axios.get(API_URL + "/all-books");
@@ -23,6 +24,6 @@ const UserService = {
   getUserBoard,
   getModeratorBoard,
   getAdminBoard,
-}
+};
 
 export default UserService;

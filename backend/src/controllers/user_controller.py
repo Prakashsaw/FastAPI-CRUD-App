@@ -20,6 +20,7 @@ class UserControllersClass:
         self.email_services = EmailServices()
         self.password_manager = PasswordManager()
         self.jwt_manager = JWTManager()
+        self.email_regex_parrern = r"^(?!.*\.\.)[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$"
 
     def _start_connection(self):
         """
@@ -50,7 +51,7 @@ class UserControllersClass:
         if user["name"] == "" or user["email"] == "" or user["password"] == "":
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="All fields are required!")
 
-        if not re.match(r"\"?([-a-zA-Z0-9.`?{}]+@\w+\.\w+)\"?", user["email"]):
+        if not re.match(self.email_regex_parrern, user["email"]):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid email format!")
 
         if not self.password_manager.is_password_strong_enough(user["password"]):

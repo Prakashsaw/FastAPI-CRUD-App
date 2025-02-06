@@ -14,14 +14,6 @@ const required = (value) => {
   }
 };
 
-const validEmail = (value) => {
-  if (!isEmail(value)) {
-    return (
-      <div className="invalid-feedback d-block">This is not a valid email.</div>
-    );
-  }
-};
-
 const vusername = (value) => {
   if (value.length < 3 || value.length > 20) {
     return (
@@ -32,15 +24,23 @@ const vusername = (value) => {
   }
 };
 
-const vpassword = (value) => {
-  if (value.length < 8 || value.length > 40) {
-    return (
-      <div className="invalid-feedback d-block">
-        The password must be between 8 and 40 characters.
-      </div>
-    );
-  }
-};
+// const validEmail = (value) => {
+//   if (!isEmail(value)) {
+//     return (
+//       <div className="invalid-feedback d-block">This is not a valid email.</div>
+//     );
+//   }
+// };
+
+// const vpassword = (value) => {
+//   if (value.length < 8 || value.length > 40) {
+//     return (
+//       <div className="invalid-feedback d-block">
+//         The password must be between 8 and 40 characters.
+//       </div>
+//     );
+//   }
+// };
 
 const Register = (props) => {
   const form = useRef();
@@ -84,6 +84,23 @@ const Register = (props) => {
     form.current.validateAll();
 
     if (checkBtn.current.context._errors.length === 0) {
+      if (!isEmail(email)) {
+        setMessage(
+          "Please enter a valid email address. Examples: test_email@domain.com, example@gmail.com, etc..."
+        );
+        setSuccessful(false);
+        setLoading(false);
+        return;
+      }
+
+      if (password.length < 8) {
+        setMessage(
+          "The password must be 8 characters long. It must contain at least one uppercase letter, one lowercase letter, one number and one special character. Examples: Abc@1234, Strong_Password#1, etc..."
+        );
+        setSuccessful(false);
+        setLoading(false);
+        return;
+      }
       if (password !== confirmPassword) {
         setMessage("Passwords and ConfirmPassword don't match!");
         setSuccessful(false);
@@ -146,7 +163,7 @@ const Register = (props) => {
                   name="email"
                   value={email}
                   onChange={onChangeEmail}
-                  validations={[required, validEmail]}
+                  validations={[required]}
                 />
               </div>
 
@@ -158,7 +175,7 @@ const Register = (props) => {
                   name="password"
                   value={password}
                   onChange={onChangePassword}
-                  validations={[required, vpassword]}
+                  validations={[required]}
                 />
               </div>
               <div className="form-group">
@@ -169,7 +186,7 @@ const Register = (props) => {
                   name="confirm-password"
                   value={confirmPassword}
                   onChange={onChangeConfirmPassword}
-                  validations={[required, vpassword]}
+                  validations={[required]}
                 />
               </div>
 
