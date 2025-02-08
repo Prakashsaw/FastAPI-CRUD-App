@@ -137,6 +137,10 @@ const Login = () => {
             <Link to="/send-reset-password-link">Forgot Password?</Link>
           </div>
 
+          <div className="form-group text-center">
+            Don't have an account?<Link to="/register"> Sign Up</Link>
+          </div>
+
           {message && (
             <div className="form-group">
               <div className="alert alert-danger" role="alert">
