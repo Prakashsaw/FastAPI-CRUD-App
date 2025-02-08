@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef} from "react";
+import { Link } from "react-router-dom";
 import Form from "react-validation/build/form";
 import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
@@ -204,6 +205,10 @@ const Register = (props) => {
               </div>
             </div>
           )}
+
+          <div className="form-group text-center">
+            Already have an account?<Link to="/login"> Login</Link>
+          </div>
 
           {message && (
             <div className="form-group">
