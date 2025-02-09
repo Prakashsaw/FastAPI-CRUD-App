@@ -151,15 +151,15 @@ npm run start
 
 | Feature | Screenshot |
 |---------|-----------|
-| **User Sign Up** | ![Sign Up](./images/1-SignUp.png) |
-| **Email Verification Link Sent** | ![Verification Email](./images/2-SignUp-Success-Email-Verification-link-sent.png) |
-| **Email Verification Confirmation** | ![Verify Email](./images/3-Verify-email.png) |
-| **User Login** | ![Login](./images/4-Login.png) |
-| **Forgot Password** | ![Forgot Password](./images/5-Forgot-Password.png) |
-| **Reset Password Link Sent** | ![Reset Password Link](./images/6-Reset-Password-Lint-Sent-Success.png) |
-| **Reset Password** | ![Reset Password](./images/7-Reset-Password.png) |
-| **User Dashboard** | ![Home Page](./images/8-Home-Page-User-Details.png) |
-| **Session Expiry & Token Refresh** | ![Session Expiry](./images/9-Session-Expired-Refresh-Token.png) |
+| **User Sign Up** | ![Sign Up](frontend/images/1-SignUp.png) |
+| **Email Verification Link Sent** | ![Verification Email](frontend/images/2-SignUp-Success-Email-Verification-link-sent.png) |
+| **Email Verification Confirmation** | ![Verify Email](frontend/images/3-Verify-email.png) |
+| **User Login** | ![Login](frontend/images/4-Login.png) |
+| **Forgot Password** | ![Forgot Password](frontend/images/5-Forgot-Password.png) |
+| **Reset Password Link Sent** | ![Reset Password Link](frontend/images/6-Reset-Password-Lint-Sent-Success.png) |
+| **Reset Password** | ![Reset Password](frontend/images/7-Reset-Password.png) |
+| **User Dashboard** | ![Home Page](frontend/images/8-Home-Page-User-Details.png) |
+| **Session Expiry & Token Refresh** | ![Session Expiry](frontend/images/9-Session-Expired-Refresh-Token.png) |
 
 ---
 
