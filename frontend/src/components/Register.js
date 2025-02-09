@@ -135,15 +135,14 @@ const Register = (props) => {
   return (
     <div className="col-md-12">
       <div className="card card-container">
-        <img
-          src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
-          alt="profile-img"
-          className="profile-img-card"
-        />
-
         <Form onSubmit={handleRegister} ref={form}>
           {!successful && (
             <div>
+              <img
+                src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
+                alt="profile-img"
+                className="profile-img-card"
+              />
               <div className="form-group">
                 <label htmlFor="username">Name</label>
                 <Input
@@ -203,12 +202,11 @@ const Register = (props) => {
                   )}
                 </button>
               </div>
+              <div className="form-group text-center">
+                Already have an account?<Link to="/login"> Login</Link>
+              </div>
             </div>
           )}
-
-          <div className="form-group text-center">
-            Already have an account?<Link to="/login"> Login</Link>
-          </div>
 
           {message && (
             <div className="form-group">
